@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tattoo Concept Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        gold: {
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8">
+        
+        <!-- Header -->
+        <header class="text-center mb-10 border-b border-slate-700 pb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
+                <i class="fa-solid fa-pen-nib text-gold-500 mr-3"></i>Ink<span class="text-gold-500">Prompt</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base">Generatore di concept per tatuaggi ottimizzato per AI (Nano Banana)</p>
+        </header>
+
+        <!-- Form Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Inputs -->
+            <div class="space-y-6">
+                
+                <!-- Subject Input -->
+                <div>
+                    <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">1. Descrivi il Soggetto</label>
+                    <textarea id="subjectInput" rows="3" 
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
+                        placeholder="Es: Un lupo che ulula alla luna geometrica con rose..."></textarea>
+                </div>
+
+                <!-- Style Select -->
+                <div>
+                    <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">2. Stile Artistico</label>
+                    <div class="relative">
+                        <select id="styleSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                            <option value="" disabled selected>Seleziona uno stile...</option>
+                            <!-- Options populated via JS -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Context & Gender Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Context Select -->
+                    <div>
+                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">3. Contesto / Posizione</label>
+                        <div class="relative">
+                            <select id="contextSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                <option value="" disabled selected>Dove va?</option>
+                                <!-- Options populated via JS -->
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gender Select -->
+                    <div>
+                        <label class="block text-slate-400 text-sm font-bold mb-2 uppercase tracking-wider">Anatomia (Opzionale)</label>
+                        <div class="relative">
+                            <select id="genderSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                <option value="man">Uomo</option>
+                                <option value="woman">Donna</option>
+                                <option value="neutral">Neutro / Non spec.</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button onclick="generatePrompt()" 
+                    class="w-full bg-gradient-to-r from-gold-600 to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-slate-900 font-bold py-4 px-6 rounded-lg shadow-lg transform transition hover:-translate-y-1 active:translate-y-0 mt-4">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Genera Prompt
+                </button>
+
+            </div>
+
+            <!-- Right Column: Output -->
+            <div class="flex flex-col h-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden relative">
+                <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-mono text-slate-400 uppercase">Output Prompt</span>
+                    <span class="text-xs text-green-500 hidden" id="copySuccess"><i class="fa-solid fa-check"></i> Copiato!</span>
+                </div>
+                
+                <textarea id="outputPrompt" readonly 
+                    class="flex-grow w-full bg-transparent p-6 text-slate-300 font-mono text-sm resize-none focus:outline-none custom-scrollbar leading-relaxed"
+                    placeholder="Il tuo prompt apparirà qui pronto per essere copiato..."></textarea>
+                
+                <div class="p-4 bg-slate-900 border-t border-slate-800">
+                    <button onclick="copyToClipboard()" 
+                        class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-4 rounded border border-slate-600 transition flex justify-center items-center group">
+                        <i class="fa-regular fa-copy mr-2 group-hover:scale-110 transition"></i> Copia negli appunti
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-slate-500 text-xs">
+            <p>Ottimizzato per modelli Stable Diffusion XL, Midjourney v6 e Nano Banana.</p>
+        </div>
+    </main>
+
+    <script>
+        // --- DATASETS ---
+
+        // 50+ Styles optimized for Tattoo Generation
+        const styles = [
+            "Traditional Old School (Bold lines, limited palette)",
+            "Neo-Traditional (Bold lines, vibrant colors, depth)",
+            "Realism Black & Grey (Photorealistic, shading)",
+            "Realism Color (Photorealistic, vibrant)",
+            "Watercolor (Paint splashes, no outlines, soft)",
+            "Tribal (Solid black, curved lines)",
+            "Polynesian / Maori (Cultural patterns, intricate)",
+            "Irezumi (Traditional Japanese, wind bars, waves)",
+            "Blackwork (Heavy black fill, negative space)",
+            "Dotwork / Pointillism (Created entirely of dots)",
+            "Geometric (Sacred geometry, shapes, lines)",
+            "Minimalist / Fine Line (Single needle, simple)",
+            "Single Line (Continuous line drawing)",
+            "Script / Lettering / Calligraphy",
+            "Chicano (Black & grey, smooth shading, street culture)",
+            "Biomechanical (Gears, robotics under skin)",
+            "Bio-Organic (Alien textures, bones, nature)",
+            "Trash Polka (Red & Black, chaotic, collage-like)",
+            "Surrealism (Dreamlike, melting, bizarre)",
+            "Abstract (Non-representational, artistic flow)",
+            "Sketch Style (Pencil lines, rough, construction lines)",
+            "Woodcut / Etching / Engraving (Linework shading)",
+            "Gothic / Dark Art (Macabre, skulls, dark atmosphere)",
+            "Celtic (Knots, crosses, intricate loops)",
+            "Viking / Norse (Runes, mythology, raw)",
+            "Mandala (Circular, symmetrical, spiritual)",
+            "Henna / Mehndi Style (Ornamental, floral patterns)",
+            "3D Effect (Shadows creating depth on skin)",
+            "Optical Illusion (Visual tricks)",
+            "Glitch Art (Digital distortion, pixelated)",
+            "Cyberpunk (Neon, futuristic, tech)",
+            "Steampunk (Victorian tech, brass, steam)",
+            "Anime / Manga Style (Cel shaded, bold)",
+            "New School (Cartoonish, exaggerated, bright)",
+            "Graffiti / Street Art (Spray paint effect)",
+            "Horror (Gore, spooky, monsters)",
+            "Portraiture (Faces, realistic rendering)",
+            "Botanical Illustration (Scientific plant accuracy)",
+            "Floral (Softer, flowy flowers)",
+            "X-Ray Effect (Transparency, skeletal)",
+            "Patchwork (Look like sewn patches)",
+            "Stained Glass (Bold outlines, segmented colors)",
+            "Negative Space (Skin forms the image)",
+            "White Ink (Subtle, scar-like)",
+            "Ignorant Style (Naive, crude, simple lines)",
+            "Blast Over (Covering old tattoos, layered)",
+            "Micro Realism (Tiny, highly detailed)",
+            "Stipple Shading (Whip shading technique)",
+            "Pixel Art (8-bit, retro gaming)",
+            "Embroidery Effect (Looks like stitched thread)",
+            "Oil Painting (Brush strokes, textured)"
+        ];
+
+        // 50+ Contexts (Body parts & Design modes)
+        const contexts = [
+            // Design/Concept Modes
+            { val: "design_white", label: "Design: Foglio Bianco (Clean Flash)", type: "flat" },
+            { val: "design_parchment", label: "Design: Carta Pergamena Vintage", type: "flat" },
+            { val: "design_stencil", label: "Design: Stencil (Linee Guida)", type: "flat" },
+            { val: "design_digital", label: "Design: Illustrazione Digitale (iPad)", type: "flat" },
+            { val: "design_synthetic", label: "Design: Pelle Sintetica (Mockup)", type: "flat" },
+            
+            // Upper Body
+            { val: "body_forearm_inner", label: "Corpo: Avambraccio Interno", type: "body" },
+            { val: "body_forearm_outer", label: "Corpo: Avambraccio Esterno", type: "body" },
+            { val: "body_bicep_inner", label: "Corpo: Bicipite Interno", type: "body" },
+            { val: "body_bicep_outer", label: "Corpo: Bicipite Esterno / Spalla", type: "body" },
+            { val: "body_sleeve_full", label: "Corpo: Manica Intera (Full Sleeve)", type: "body" },
+            { val: "body_sleeve_half", label: "Corpo: Mezza Manica", type: "body" },
+            { val: "body_chest_center", label: "Corpo: Sterno / Centro Petto", type: "body" },
+            { val: "body_chest_pec", label: "Corpo: Pettorale (Singolo)", type: "body" },
+            { val: "body_chest_full", label: "Corpo: Petto Intero (Chest Piece)", type: "body" },
+            { val: "body_ribs", label: "Corpo: Costole / Fianco Alto", type: "body" },
+            { val: "body_stomach", label: "Corpo: Ventre / Addome", type: "body" },
+            { val: "body_hip", label: "Corpo: Fianco Basso / Anca", type: "body" },
+            
+            // Back
+            { val: "body_back_upper", label: "Corpo: Schiena Alta / Scapola", type: "body" },
+            { val: "body_back_lower", label: "Corpo: Fondoschiena / Lombare", type: "body" },
+            { val: "body_back_full", label: "Corpo: Schiena Intera (Backpiece)", type: "body" },
+            { val: "body_spine", label: "Corpo: Colonna Vertebrale", type: "body" },
+            
+            // Lower Body
+            { val: "body_thigh_front", label: "Corpo: Coscia Anteriore", type: "body" },
+            { val: "body_thigh_side", label: "Corpo: Coscia Laterale", type: "body" },
+            { val: "body_thigh_back", label: "Corpo: Retro Coscia", type: "body" },
+            { val: "body_knee", label: "Corpo: Ginocchio", type: "body" },
+            { val: "body_shin", label: "Corpo: Stinco", type: "body" },
+            { val: "body_calf", label: "Corpo: Polpaccio", type: "body" },
+            { val: "body_ankle", label: "Corpo: Caviglia", type: "body" },
+            { val: "body_foot_top", label: "Corpo: Collo del Piede", type: "body" },
+            
+            // Head/Neck/Hands
+            { val: "body_neck_side", label: "Corpo: Collo (Lato)", type: "body" },
+            { val: "body_neck_back", label: "Corpo: Nuca", type: "body" },
+            { val: "body_throat", label: "Corpo: Gola", type: "body" },
+            { val: "body_behind_ear", label: "Corpo: Dietro l'Orecchio", type: "body" },
+            { val: "body_hand_back", label: "Corpo: Dorso della Mano", type: "body" },
+            { val: "body_palm", label: "Corpo: Palmo della Mano", type: "body" },
+            { val: "body_fingers", label: "Corpo: Dita / Knuckles", type: "body" },
+            { val: "body_wrist", label: "Corpo: Polso", type: "body" },
+            { val: "body_face", label: "Corpo: Viso", type: "body" },
+            { val: "body_head_side", label: "Corpo: Testa (Lato)", type: "body" }
+        ];
+
+        // --- INITIALIZATION ---
+
+        function init() {
+            const styleSel = document.getElementById('styleSelect');
+            const contextSel = document.getElementById('contextSelect');
+
+            // Populate Styles
+            styles.forEach(style => {
+                const opt = document.createElement('option');
+                opt.value = style;
+                opt.textContent = style;
+                styleSel.appendChild(opt);
+            });
+
+            // Populate Contexts
+            contexts.forEach(ctx => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify(ctx); // Store full object in value
+                opt.textContent = ctx.label;
+                contextSel.appendChild(opt);
+            });
+        }
+
+        window.onload = init;
+
+        // --- LOGIC ---
+
+        function generatePrompt() {
+            const subject = document.getElementById('subjectInput').value.trim();
+            const style = document.getElementById('styleSelect').value;
+            const contextRaw = document.getElementById('contextSelect').value;
+            const gender = document.getElementById('genderSelect').value;
+
+            if (!subject) {
+                alert("Per favore descrivi prima il soggetto del tatuaggio.");
+                return;
+            }
+            if (!style) {
+                alert("Seleziona uno stile.");
+                return;
+            }
+            if (!contextRaw) {
+                alert("Seleziona un contesto.");
+                return;
+            }
+
+            const contextObj = JSON.parse(contextRaw);
+            let prompt = "";
+            let contextString = "";
+
+            // 1. Build Context String based on type
+            if (contextObj.type === "body") {
+                // Translator for basic prompt logic
+                let genderTerm = "";
+                if (gender === "man") genderTerm = "male";
+                else if (gender === "woman") genderTerm = "female";
+                else genderTerm = "person";
+
+                // Extract clean name from label (remove "Corpo: ")
+                const bodyPart = contextObj.label.replace("Corpo: ", "").toLowerCase(); // Italian to prompt mapping usually needs English, but modern models handle mixed well. Let's try to map keys or keep it simple.
+                // For better AI results, we map common Italian body parts to English roughly or keep description generic
+                
+                contextString = `tattooed on ${genderTerm} ${translateBodyPart(contextObj.val)}, close up photo, skin texture, realistic body placement`;
+            } else {
+                // Flat design
+                if(contextObj.val.includes("white")) contextString = "clean white background, 2d design, flat vector style, isolated";
+                else if(contextObj.val.includes("parchment")) contextString = "on vintage parchment paper, sketch style, textured paper background";
+                else if(contextObj.val.includes("stencil")) contextString = "tattoo stencil, purple carbon lines on white paper, outline only, no shading";
+                else if(contextObj.val.includes("digital")) contextString = "digital art illustration, high definition, flat lay";
+                else contextString = "isolated design, neutral background";
+            }
+
+            // 2. Construct Final Prompt
+            // Structure: [Style] tattoo design of [Subject], [Context], [Quality Boosters]
+            
+            prompt = `${style} tattoo design showing ${subject}. ${contextString}. Masterpiece, professional tattoo artist portfolio, 8k resolution, highly detailed, sharp focus, clear ink, high contrast.`;
+
+            document.getElementById('outputPrompt').value = prompt;
+        }
+
+        function translateBodyPart(val) {
+            // Simple mapping helper to ensure the AI understands the anatomy better than Italian keywords sometimes
+            const map = {
+                "body_forearm_inner": "inner forearm",
+                "body_forearm_outer": "outer forearm",
+                "body_bicep_inner": "inner bicep",
+                "body_bicep_outer": "shoulder and bicep",
+                "body_sleeve_full": "full arm sleeve",
+                "body_sleeve_half": "half arm sleeve",
+                "body_chest_center": "center of chest sternum",
+                "body_chest_pec": "pectoral muscle",
+                "body_chest_full": "full chest",
+                "body_ribs": "rib cage side",
+                "body_stomach": "stomach abdomen",
+                "body_hip": "hip bone",
+                "body_back_upper": "upper back shoulder blade",
+                "body_back_lower": "lower back",
+                "body_back_full": "full back",
+                "body_spine": "spine line",
+                "body_thigh_front": "front of thigh",
+                "body_thigh_side": "side of thigh",
+                "body_thigh_back": "back of thigh",
+                "body_knee": "knee",
+                "body_shin": "shin bone",
+                "body_calf": "calf muscle",
+                "body_ankle": "ankle",
+                "body_foot_top": "top of foot",
+                "body_neck_side": "side of neck",
+                "body_neck_back": "back of neck",
+                "body_throat": "throat",
+                "body_behind_ear": "skin behind ear",
+                "body_hand_back": "back of hand",
+                "body_palm": "palm of hand",
+                "body_fingers": "fingers",
+                "body_wrist": "wrist",
+                "body_face": "face",
+                "body_head_side": "side of head"
+            };
+            return map[val] || "skin";
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("outputPrompt");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // Mobile
+            
+            try {
+                // Fallback robusto per iframe/ambienti protetti
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    const badge = document.getElementById('copySuccess');
+                    badge.classList.remove('hidden');
+                    setTimeout(() => {
+                        badge.classList.add('hidden');
+                    }, 2000);
+                } else {
+                    // Fallback manuale se tutto fallisce
+                    alert("Copia automatica non supportata. Premi Ctrl+C / Cmd+C.");
+                }
+            } catch (err) {
+                console.error('Errore copia:', err);
+                alert("Errore durante la copia.");
+            }
+        }
+    </script>
+</body>
+</html>
+
+
