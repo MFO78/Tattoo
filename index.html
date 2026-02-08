@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Concept Generator V13</title>
+    <title>Tattoo Concept Generator V14</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -734,7 +734,7 @@
                 div.innerHTML = `<i class="fa-solid ${opt.icon} item-icon"></i> ${opt.label}`;
                 div.onclick = (e) => {
                      e.stopPropagation();
-                     selectOption('fixType', opt.val, opt.label, opt.icon);
+                     selectOption('fixTypeSelect', opt.val, opt.label, opt.icon);
                 };
                 container.appendChild(div);
             });
