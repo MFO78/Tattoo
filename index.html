@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Concept Generator V12</title>
+    <title>Tattoo Concept Generator V13</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -146,7 +146,7 @@
 <body class="min-h-screen flex flex-col items-center py-10 px-4" onclick="closeAllSelect(event)">
 
     <!-- Main Container -->
-    <main class="w-full max-w-5xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8">
+    <main class="w-full max-w-5xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8 relative">
         
         <!-- Header with Responsive Language Switcher -->
         <header class="text-center mb-8 border-b border-slate-700 pb-6 relative">
@@ -916,6 +916,9 @@
             let textString = "";
             if (isTextEnabled && textContent) {
                 textString = `, incorporating the text "${textContent}" written in a matching font, clearly legible text "${textContent}" integrated into the design`;
+            } else {
+                // FORCE NO TEXT when toggle is OFF
+                textString = ", no text, no lettering, no script, no typography, visual elements only";
             }
 
             if (currentMode === 'new') {
