@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Concept Generator V7</title>
+    <title>Tattoo Concept Generator V12</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -111,6 +111,36 @@
             margin-right: 12px;
             color: #eab308;
         }
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #eab308;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #eab308;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: transparent;
+        }
+        .lang-btn {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.1);
+            opacity: 0.8;
+        }
+        .lang-btn.active {
+            opacity: 1;
+            font-weight: bold;
+            color: #020617;
+            background: #eab308;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4" onclick="closeAllSelect(event)">
@@ -118,21 +148,30 @@
     <!-- Main Container -->
     <main class="w-full max-w-5xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8">
         
-        <!-- Header -->
-        <header class="text-center mb-8 border-b border-slate-700 pb-6">
+        <!-- Header with Responsive Language Switcher -->
+        <header class="text-center mb-8 border-b border-slate-700 pb-6 relative">
+            
+            <!-- Language Switcher: Stacks on mobile, Absolute Right on Desktop -->
+            <div class="flex justify-center md:justify-end md:absolute md:top-0 md:right-0 w-full md:w-auto mb-4 md:mb-0 z-20">
+                <div class="bg-slate-900/50 p-1 rounded-lg border border-slate-700 flex space-x-1 text-sm">
+                    <span onclick="setLanguage('it')" id="lang-it" class="lang-btn active">IT</span>
+                    <span onclick="setLanguage('en')" id="lang-en" class="lang-btn">EN</span>
+                </div>
+            </div>
+
             <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
                 <i class="fa-solid fa-pen-nib text-gold-500 mr-3"></i>Ink<span class="text-gold-500">Prompt</span>
             </h1>
-            <p class="text-slate-400 text-sm md:text-base">Generatore & Restyling Tatuaggi AI (Nano Banana/SDXL)</p>
+            <p class="text-slate-400 text-sm md:text-base" data-i18n="subtitle">Generatore & Restyling Tatuaggi AI</p>
         </header>
 
         <!-- Tabs -->
         <div class="flex mb-8 space-x-6 justify-center">
             <button onclick="switchTab('new')" id="tab-new" class="tab-active text-lg font-bold pb-2 uppercase tracking-wide transition-colors border-b-2 border-gold-500 text-gold-500">
-                <i class="fa-solid fa-plus-circle mr-2"></i>Nuovo Concept
+                <i class="fa-solid fa-plus-circle mr-2"></i><span data-i18n="tab_new">Nuovo Concept</span>
             </button>
             <button onclick="switchTab('fix')" id="tab-fix" class="tab-inactive text-lg font-bold pb-2 uppercase tracking-wide transition-colors border-b-2 border-transparent text-slate-500 hover:text-slate-300">
-                <i class="fa-solid fa-bandage mr-2"></i>Cover-Up / Modifica
+                <i class="fa-solid fa-bandage mr-2"></i><span data-i18n="tab_fix">Cover-Up / Modifica</span>
             </button>
         </div>
 
@@ -145,10 +184,10 @@
                 <!-- SECTION: NEW DESIGN -->
                 <div id="section-new" class="space-y-5">
                     <div>
-                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider">1. Descrivi il Soggetto</label>
+                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_subject">1. Descrivi il Soggetto</label>
                         <textarea id="subjectInput" rows="3" 
                             class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
-                            placeholder="Es: Un serpente giapponese che avvolge una peonia..."></textarea>
+                            placeholder=""></textarea>
                     </div>
                 </div>
 
@@ -159,7 +198,7 @@
                         <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="previewImage(event)">
                         <div id="uploadPlaceholder">
                             <i class="fa-solid fa-camera text-3xl text-slate-500 mb-2"></i>
-                            <p class="text-slate-400 text-sm">Carica foto attuale</p>
+                            <p class="text-slate-400 text-sm" data-i18n="upload_text">Carica foto attuale</p>
                         </div>
                         <img id="imagePreview" class="hidden max-h-40 mx-auto rounded shadow-lg object-contain" />
                         <button id="removeImageBtn" onclick="removeImage(event)" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
@@ -169,35 +208,24 @@
 
                     <!-- Fix Type Custom Select -->
                     <div>
-                         <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider">Tipo di Intervento</label>
+                         <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_intervention">Tipo di Intervento</label>
                          <div class="custom-select" id="fixTypeSelect-container">
                             <div class="select-selected" onclick="toggleSelect(event, 'fixTypeSelect-list')">
-                                <span><i class="fa-solid fa-circle-question mr-2 text-gold-500"></i> Scegli intervento...</span>
+                                <span><i class="fa-solid fa-circle-question mr-2 text-gold-500"></i> <span data-i18n="select_intervention">Scegli intervento...</span></span>
                                 <i class="fa-solid fa-chevron-down text-sm"></i>
                             </div>
                             <div id="fixTypeSelect-list" class="select-items select-hide custom-scrollbar">
-                                <div class="select-item" onclick="selectOption('fixType', 'coverup', 'Cover Up (Totale)', 'fa-layer-group')">
-                                    <i class="fa-solid fa-layer-group item-icon"></i> Cover Up (Totale)
-                                </div>
-                                <div class="select-item" onclick="selectOption('fixType', 'rework', 'Rework / Restauro', 'fa-wand-magic-sparkles')">
-                                    <i class="fa-solid fa-wand-magic-sparkles item-icon"></i> Rework / Restauro
-                                </div>
-                                <div class="select-item" onclick="selectOption('fixType', 'add', 'Espansione', 'fa-arrows-left-right')">
-                                    <i class="fa-solid fa-arrows-left-right item-icon"></i> Espansione
-                                </div>
-                                <div class="select-item" onclick="selectOption('fixType', 'color', 'Colorize', 'fa-palette')">
-                                    <i class="fa-solid fa-palette item-icon"></i> Colorize
-                                </div>
+                                <!-- Populated via JS based on language -->
                             </div>
                             <input type="hidden" id="fixTypeSelect" value="">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider">Istruzioni Modifica</label>
+                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_instructions">Istruzioni Modifica</label>
                         <textarea id="fixInput" rows="2" 
                             class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
-                            placeholder="Es: Scurisci il fondo per coprire la scritta..."></textarea>
+                            placeholder=""></textarea>
                     </div>
                 </div>
 
@@ -206,10 +234,10 @@
                     
                     <!-- Style Custom Select -->
                     <div>
-                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider">Stile Artistico</label>
+                        <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_style">Stile Artistico</label>
                         <div class="custom-select" id="styleSelect-container">
                             <div class="select-selected" onclick="toggleSelect(event, 'styleSelect-list')">
-                                <span id="styleSelect-display"><i class="fa-solid fa-palette mr-2 text-gold-500"></i> Seleziona Stile...</span>
+                                <span id="styleSelect-display"><i class="fa-solid fa-palette mr-2 text-gold-500"></i> <span data-i18n="select_style">Seleziona Stile...</span></span>
                                 <i class="fa-solid fa-chevron-down text-sm"></i>
                             </div>
                             <div id="styleSelect-list" class="select-items select-hide custom-scrollbar">
@@ -224,10 +252,10 @@
                         
                         <!-- Context Custom Select -->
                         <div>
-                            <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider">Posizione / Supporto</label>
+                            <label class="block text-gold-500 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_context">Posizione / Supporto</label>
                             <div class="custom-select" id="contextSelect-container">
                                 <div class="select-selected" onclick="toggleSelect(event, 'contextSelect-list')">
-                                    <span id="contextSelect-display"><i class="fa-solid fa-compass-drafting mr-2 text-gold-500"></i> Posizione...</span>
+                                    <span id="contextSelect-display"><i class="fa-solid fa-compass-drafting mr-2 text-gold-500"></i> <span data-i18n="select_context">Posizione...</span></span>
                                     <i class="fa-solid fa-chevron-down text-sm"></i>
                                 </div>
                                 <div id="contextSelect-list" class="select-items select-hide custom-scrollbar">
@@ -239,24 +267,78 @@
 
                         <!-- Gender Custom Select -->
                         <div>
-                            <label class="block text-slate-400 text-xs font-bold mb-2 uppercase tracking-wider">Anatomia</label>
+                            <label class="block text-slate-400 text-xs font-bold mb-2 uppercase tracking-wider" data-i18n="label_anatomy">Anatomia</label>
                              <div class="custom-select" id="genderSelect-container">
                                 <div class="select-selected" onclick="toggleSelect(event, 'genderSelect-list')">
-                                    <span id="genderSelect-display"><i class="fa-solid fa-mars mr-2 text-gold-500"></i> Uomo</span>
+                                    <span id="genderSelect-display"><i class="fa-solid fa-mars mr-2 text-gold-500"></i> <span data-i18n="gender_man">Uomo</span></span>
                                     <i class="fa-solid fa-chevron-down text-sm"></i>
                                 </div>
                                 <div id="genderSelect-list" class="select-items select-hide custom-scrollbar">
-                                     <div class="select-item" onclick="selectOption('genderSelect', 'man', 'Uomo', 'fa-mars')">
-                                        <i class="fa-solid fa-mars item-icon"></i> Uomo
-                                    </div>
-                                    <div class="select-item" onclick="selectOption('genderSelect', 'woman', 'Donna', 'fa-venus')">
-                                        <i class="fa-solid fa-venus item-icon"></i> Donna
-                                    </div>
-                                    <div class="select-item" onclick="selectOption('genderSelect', 'neutral', 'Neutro', 'fa-genderless')">
-                                        <i class="fa-solid fa-genderless item-icon"></i> Neutro
-                                    </div>
+                                     <!-- Populated via JS -->
                                 </div>
                                 <input type="hidden" id="genderSelect" value="man">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADVANCED OPTIONS -->
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                        <label class="block text-gold-500 text-xs font-bold mb-4 uppercase tracking-wider" data-i18n="label_advanced">Opzioni Avanzate</label>
+                        
+                        <div class="flex flex-col space-y-4">
+                            
+                             <!-- Toggle 4: Text Input -->
+                             <div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-font text-gold-500 w-6"></i>
+                                        <span class="text-slate-300 text-sm ml-2" data-i18n="opt_text">Inserisci Testo / Scritta</span>
+                                    </div>
+                                    <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                                        <input type="checkbox" name="toggle" id="textToggle" onchange="toggleTextSection()" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label for="textToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer border border-slate-600"></label>
+                                    </div>
+                                </div>
+                                <!-- Hidden Text Input -->
+                                <div id="textSection" class="hidden mt-3 transition-all duration-300">
+                                    <input type="text" id="tattooText" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-sm text-white placeholder-slate-500 focus:border-gold-500 focus:outline-none" placeholder="Mom, Carpe Diem, 1990...">
+                                </div>
+                            </div>
+                            
+                            <!-- Toggle 1: Sarcasm -->
+                            <div class="flex items-center justify-between border-t border-slate-700 pt-3">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-face-grin-tongue-wink text-gold-500 w-6"></i>
+                                    <span class="text-slate-300 text-sm ml-2" data-i18n="opt_sarcasm">Ironia / Sarcasmo</span>
+                                </div>
+                                <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="sarcasmToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                    <label for="sarcasmToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer border border-slate-600"></label>
+                                </div>
+                            </div>
+
+                            <!-- Toggle 2: Interaction -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-share-nodes text-gold-500 w-6"></i>
+                                    <span class="text-slate-300 text-sm ml-2" data-i18n="opt_3d">Fit Anatomico 3D</span>
+                                </div>
+                                <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="interactionToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                    <label for="interactionToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer border border-slate-600"></label>
+                                </div>
+                            </div>
+
+                             <!-- Toggle 3: Literal Interaction -->
+                             <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-hand-holding-medical text-gold-500 w-6"></i>
+                                    <span class="text-slate-300 text-sm ml-2" data-i18n="opt_action">Interazione Fisica / Azione</span>
+                                </div>
+                                <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="literalInteractionToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                    <label for="literalInteractionToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer border border-slate-600"></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -264,20 +346,20 @@
                     <!-- Eccentricity Slider -->
                     <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
                         <div class="flex justify-between items-end mb-2">
-                            <label class="block text-gold-500 text-xs font-bold uppercase tracking-wider">Libertà Artistica AI</label>
+                            <label class="block text-gold-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_creativity">Libertà Artistica AI</label>
                             <span id="sliderValue" class="text-xs text-gold-500 font-mono">Bilanciato (50%)</span>
                         </div>
                         <input type="range" id="eccentricitySlider" min="0" max="100" value="50" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer">
                         <div class="flex justify-between text-xs text-slate-400 mt-2 font-mono">
-                            <span>Tecnico/Preciso</span>
-                            <span>Visionario/Artistico</span>
+                            <span data-i18n="slider_low">Tecnico/Preciso</span>
+                            <span data-i18n="slider_high">Visionario/Artistico</span>
                         </div>
                     </div>
 
                     <!-- Generate Button -->
                     <button onclick="generatePrompt()" 
                         class="w-full bg-gradient-to-r from-gold-600 to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-slate-900 font-bold py-4 px-6 rounded-lg shadow-lg transform transition hover:-translate-y-1 active:translate-y-0">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Genera Prompt
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> <span data-i18n="btn_generate">Genera Prompt</span>
                     </button>
                 </div>
             </div>
@@ -285,21 +367,21 @@
             <!-- RIGHT COLUMN: OUTPUT -->
             <div class="flex flex-col h-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden relative min-h-[400px]">
                 <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-400 uppercase">Prompt Ottimizzato</span>
-                    <span class="text-xs text-green-500 hidden opacity-0 transition-opacity duration-300" id="copySuccess"><i class="fa-solid fa-check"></i> Copiato!</span>
+                    <span class="text-xs font-mono text-slate-400 uppercase" data-i18n="label_output">Prompt Ottimizzato</span>
+                    <span class="text-xs text-green-500 hidden opacity-0 transition-opacity duration-300" id="copySuccess"><i class="fa-solid fa-check"></i> <span data-i18n="msg_copied">Copiato!</span></span>
                 </div>
                 
                 <textarea id="outputPrompt" readonly 
                     class="flex-grow w-full bg-transparent p-6 text-slate-300 font-mono text-sm resize-none focus:outline-none custom-scrollbar leading-relaxed"
-                    placeholder="Il tuo prompt apparirà qui..."></textarea>
+                    placeholder="..."></textarea>
                 
                 <div class="p-4 bg-slate-900 border-t border-slate-800 space-y-2">
                      <p class="text-xs text-slate-500 mb-2 italic" id="uploadHint" style="display:none;">
-                        <i class="fa-solid fa-info-circle"></i> Usa questo prompt caricando la tua foto nella AI.
+                        <i class="fa-solid fa-info-circle"></i> <span data-i18n="hint_img2img">Usa questo prompt caricando la tua foto nella AI.</span>
                     </p>
                     <button onclick="copyToClipboard()" 
                         class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-4 rounded border border-slate-600 transition flex justify-center items-center group">
-                        <i class="fa-regular fa-copy mr-2 group-hover:scale-110 transition"></i> Copia prompt
+                        <i class="fa-regular fa-copy mr-2 group-hover:scale-110 transition"></i> <span data-i18n="btn_copy">Copia prompt</span>
                     </button>
                 </div>
             </div>
@@ -307,10 +389,161 @@
     </main>
 
     <script>
-        // --- DATASETS (Full & Categorized) ---
+        // --- TRANSLATIONS ---
+        const translations = {
+            it: {
+                subtitle: "Generatore & Restyling Tatuaggi AI",
+                tab_new: "Nuovo Concept",
+                tab_fix: "Cover-Up / Modifica",
+                label_subject: "1. Descrivi il Soggetto",
+                ph_subject: "Es: Un serpente giapponese che avvolge una peonia...",
+                upload_text: "Carica foto attuale",
+                label_intervention: "Tipo di Intervento",
+                select_intervention: "Scegli intervento...",
+                label_instructions: "Istruzioni Modifica",
+                ph_instructions: "Es: Scurisci il fondo per coprire la scritta...",
+                label_style: "Stile Artistico",
+                select_style: "Seleziona Stile...",
+                label_context: "Posizione / Supporto",
+                select_context: "Posizione...",
+                label_anatomy: "Anatomia",
+                gender_man: "Uomo",
+                gender_woman: "Donna",
+                gender_neutral: "Neutro",
+                label_advanced: "Opzioni Avanzate",
+                opt_text: "Inserisci Testo / Scritta",
+                opt_sarcasm: "Ironia / Sarcasmo",
+                opt_3d: "Fit Anatomico 3D",
+                opt_action: "Interazione Fisica / Azione",
+                label_creativity: "Libertà Artistica AI",
+                slider_low: "Tecnico/Preciso",
+                slider_high: "Visionario/Artistico",
+                slider_bal: "Bilanciato",
+                btn_generate: "Genera Prompt",
+                label_output: "Prompt Ottimizzato",
+                msg_copied: "Copiato!",
+                hint_img2img: "Usa questo prompt caricando la tua foto nella AI.",
+                btn_copy: "Copia prompt",
+                // Categories
+                cat_classic: "Classici & Culturali",
+                cat_realism: "Realismo & Ritrattistica",
+                cat_modern: "Moderno & Grafico",
+                cat_art: "Artistico & Astratto",
+                cat_dark: "Dark, Horror & Sci-Fi",
+                cat_fx: "Effetti & Texture",
+                cat_design: "Design & Studio",
+                cat_arm: "Braccia",
+                cat_torso: "Torso",
+                cat_back: "Schiena",
+                cat_leg: "Gambe",
+                cat_head: "Testa & Mani",
+                // Fix Types
+                fix_coverup: "Cover Up (Totale)",
+                fix_rework: "Rework / Restauro",
+                fix_add: "Espansione",
+                fix_color: "Colorize",
+            },
+            en: {
+                subtitle: "AI Tattoo Concept & Restyling Generator",
+                tab_new: "New Concept",
+                tab_fix: "Cover-Up / Rework",
+                label_subject: "1. Describe the Subject",
+                ph_subject: "Ex: A Japanese snake wrapping around a peony...",
+                upload_text: "Upload current photo",
+                label_intervention: "Intervention Type",
+                select_intervention: "Choose type...",
+                label_instructions: "Modification Instructions",
+                ph_instructions: "Ex: Darken the background to hide text...",
+                label_style: "Art Style",
+                select_style: "Select Style...",
+                label_context: "Placement / Medium",
+                select_context: "Placement...",
+                label_anatomy: "Anatomy",
+                gender_man: "Man",
+                gender_woman: "Woman",
+                gender_neutral: "Neutral",
+                label_advanced: "Advanced Options",
+                opt_text: "Insert Text / Script",
+                opt_sarcasm: "Irony / Sarcasm",
+                opt_3d: "3D Anatomical Fit",
+                opt_action: "Physical Interaction / Action",
+                label_creativity: "AI Artistic Freedom",
+                slider_low: "Technical/Precise",
+                slider_high: "Visionary/Artistic",
+                slider_bal: "Balanced",
+                btn_generate: "Generate Prompt",
+                label_output: "Optimized Prompt",
+                msg_copied: "Copied!",
+                hint_img2img: "Use this prompt with your uploaded photo in AI.",
+                btn_copy: "Copy Prompt",
+                // Categories
+                cat_classic: "Classic & Cultural",
+                cat_realism: "Realism & Portraiture",
+                cat_modern: "Modern & Graphic",
+                cat_art: "Artistic & Abstract",
+                cat_dark: "Dark, Horror & Sci-Fi",
+                cat_fx: "Effects & Textures",
+                cat_design: "Design & Studio",
+                cat_arm: "Arms",
+                cat_torso: "Torso",
+                cat_back: "Back",
+                cat_leg: "Legs",
+                cat_head: "Head & Hands",
+                // Fix Types
+                fix_coverup: "Cover Up (Total)",
+                fix_rework: "Rework / Restoration",
+                fix_add: "Expansion",
+                fix_color: "Colorize",
+            }
+        };
+
+        let currentLang = 'it';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // Update Toggle UI
+            document.getElementById('lang-it').className = lang === 'it' ? 'lang-btn active' : 'lang-btn';
+            document.getElementById('lang-en').className = lang === 'en' ? 'lang-btn active' : 'lang-btn';
+
+            // Update Static Text
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Update Placeholders
+            document.getElementById('subjectInput').placeholder = translations[lang].ph_subject;
+            document.getElementById('fixInput').placeholder = translations[lang].ph_instructions;
+
+            // Re-render Dropdowns
+            renderCustomOptions('styleSelect-list', stylesData, 'styleSelect');
+            renderCustomOptions('contextSelect-list', contextData, 'contextSelect');
+            renderFixTypes();
+            renderGender();
+
+            // Update Slider Text
+            const slider = document.getElementById('eccentricitySlider');
+            updateSliderText(slider.value);
+            
+            // Reset Displays
+            const fixDisplay = document.querySelector('#fixTypeSelect-container .select-selected span span');
+            if(fixDisplay) fixDisplay.textContent = translations[lang].select_intervention;
+            
+            const styleDisplay = document.querySelector('#styleSelect-container .select-selected span span');
+            if(styleDisplay) styleDisplay.textContent = translations[lang].select_style;
+
+            const contextDisplay = document.querySelector('#contextSelect-container .select-selected span span');
+            if(contextDisplay) contextDisplay.textContent = translations[lang].select_context;
+        }
+
+        // --- DATASETS ---
         
+        // Styles
         const stylesData = {
-            "Classici & Culturali": [
+            "cat_classic": [
                 { val: "Traditional Old School", icon: "fa-anchor" },
                 { val: "Neo-Traditional", icon: "fa-crow" },
                 { val: "Tribal", icon: "fa-bullseye" },
@@ -321,7 +554,7 @@
                 { val: "Chicano", icon: "fa-masks-theater" },
                 { val: "Henna / Mehndi", icon: "fa-seedling" }
             ],
-            "Realismo & Ritrattistica": [
+            "cat_realism": [
                 { val: "Realism Black & Grey", icon: "fa-camera-retro" },
                 { val: "Realism Color", icon: "fa-camera" },
                 { val: "Portraiture", icon: "fa-user" },
@@ -329,7 +562,7 @@
                 { val: "Botanical Illustration", icon: "fa-leaf" },
                 { val: "Animal Realism", icon: "fa-paw" }
             ],
-            "Moderno & Grafico": [
+            "cat_modern": [
                 { val: "Geometric", icon: "fa-shapes" },
                 { val: "Dotwork / Pointillism", icon: "fa-braille" },
                 { val: "Trash Polka", icon: "fa-explosion" },
@@ -341,7 +574,7 @@
                 { val: "Ignorant Style", icon: "fa-face-dizzy" },
                 { val: "Script / Lettering", icon: "fa-font" }
             ],
-            "Artistico & Astratto": [
+            "cat_art": [
                 { val: "Watercolor", icon: "fa-droplet" },
                 { val: "Surrealism", icon: "fa-eye" },
                 { val: "Abstract", icon: "fa-shuffle" },
@@ -349,7 +582,7 @@
                 { val: "Oil Painting", icon: "fa-brush" },
                 { val: "Optical Illusion", icon: "fa-tornado" }
             ],
-            "Dark, Horror & Sci-Fi": [
+            "cat_dark": [
                 { val: "Biomechanical", icon: "fa-robot" },
                 { val: "Bio-Organic", icon: "fa-bacterium" },
                 { val: "Gothic / Dark Art", icon: "fa-church" },
@@ -358,7 +591,7 @@
                 { val: "Steampunk", icon: "fa-gears" },
                 { val: "X-Ray Effect", icon: "fa-bone" }
             ],
-            "Effetti & Texture": [
+            "cat_fx": [
                 { val: "White Ink", icon: "fa-snowflake" },
                 { val: "Patchwork", icon: "fa-shirt" },
                 { val: "Stained Glass", icon: "fa-gem" },
@@ -368,94 +601,101 @@
             ]
         };
 
+        // Context
         const contextData = {
-            "Design & Studio": [
-                { val: "design_stencil", label: "Stencil (Linee Guida)", type: "stencil", icon: "fa-ruler-combined" },
-                { val: "design_white", label: "Flash Sheet (Sfondo Bianco)", type: "flat", icon: "fa-file" },
-                { val: "design_transfer", label: "Carta Ettografica", type: "flat", icon: "fa-copy" },
-                { val: "design_parchment", label: "Pergamena Vintage", type: "flat", icon: "fa-scroll" },
-                { val: "design_digital", label: "iPad / Procreate", type: "flat", icon: "fa-tablet-screen-button" },
-                { val: "design_synthetic", label: "Pelle Sintetica", type: "flat", icon: "fa-hand-dots" }
+            "cat_design": [
+                { val: "design_stencil", label: {it:"Stencil (Linee Guida)", en:"Stencil (Outlines)"}, type: "stencil", icon: "fa-ruler-combined" },
+                { val: "design_white", label: {it:"Flash Sheet (Sfondo Bianco)", en:"Flash Sheet (White BG)"}, type: "flat", icon: "fa-file" },
+                { val: "design_transfer", label: {it:"Carta Ettografica", en:"Transfer Paper"}, type: "flat", icon: "fa-copy" },
+                { val: "design_parchment", label: {it:"Pergamena Vintage", en:"Vintage Parchment"}, type: "flat", icon: "fa-scroll" },
+                { val: "design_digital", label: {it:"iPad / Procreate", en:"iPad / Procreate"}, type: "flat", icon: "fa-tablet-screen-button" },
+                { val: "design_synthetic", label: {it:"Pelle Sintetica", en:"Synthetic Skin"}, type: "flat", icon: "fa-hand-dots" }
             ],
-            "Braccia": [
-                { val: "body_forearm_inner", label: "Avambraccio Interno", type: "body", icon: "fa-hand-holding" },
-                { val: "body_forearm_outer", label: "Avambraccio Esterno", type: "body", icon: "fa-hand-back-fist" },
-                { val: "body_bicep_inner", label: "Bicipite Interno", type: "body", icon: "fa-dumbbell" },
-                { val: "body_bicep_outer", label: "Bicipite Est./Spalla", type: "body", icon: "fa-circle-notch" },
-                { val: "body_sleeve_full", label: "Manica Intera", type: "body", icon: "fa-shirt" },
-                { val: "body_sleeve_half", label: "Mezza Manica", type: "body", icon: "fa-shirt" },
-                { val: "body_elbow", label: "Gomito", type: "body", icon: "fa-bullseye" },
-                { val: "body_wrist", label: "Polso", type: "body", icon: "fa-stopwatch" }
+            "cat_arm": [
+                { val: "body_forearm_inner", label: {it:"Avambraccio Interno", en:"Inner Forearm"}, type: "body", icon: "fa-hand-holding" },
+                { val: "body_forearm_outer", label: {it:"Avambraccio Esterno", en:"Outer Forearm"}, type: "body", icon: "fa-hand-back-fist" },
+                { val: "body_bicep_inner", label: {it:"Bicipite Interno", en:"Inner Bicep"}, type: "body", icon: "fa-dumbbell" },
+                { val: "body_bicep_outer", label: {it:"Bicipite Est./Spalla", en:"Outer Bicep/Shoulder"}, type: "body", icon: "fa-circle-notch" },
+                { val: "body_sleeve_full", label: {it:"Manica Intera", en:"Full Sleeve"}, type: "body", icon: "fa-shirt" },
+                { val: "body_sleeve_half", label: {it:"Mezza Manica", en:"Half Sleeve"}, type: "body", icon: "fa-shirt" },
+                { val: "body_elbow", label: {it:"Gomito", en:"Elbow"}, type: "body", icon: "fa-bullseye" },
+                { val: "body_wrist", label: {it:"Polso", en:"Wrist"}, type: "body", icon: "fa-stopwatch" }
             ],
-            "Torso": [
-                { val: "body_chest_center", label: "Sterno", type: "body", icon: "fa-heart-pulse" },
-                { val: "body_sternum_under", label: "Sotto-seno (Underboob)", type: "body", icon: "fa-venus" },
-                { val: "body_chest_pec", label: "Pettorale", type: "body", icon: "fa-shield-halved" },
-                { val: "body_chest_full", label: "Petto Intero", type: "body", icon: "fa-expand" },
-                { val: "body_ribs", label: "Costole", type: "body", icon: "fa-lungs" },
-                { val: "body_stomach", label: "Ventre/Addome", type: "body", icon: "fa-cube" },
-                { val: "body_hip", label: "Fianco/Anca", type: "body", icon: "fa-person-dress" },
-                { val: "body_clavicle", label: "Clavicola", type: "body", icon: "fa-bone" }
+            "cat_torso": [
+                { val: "body_chest_center", label: {it:"Sterno", en:"Sternum"}, type: "body", icon: "fa-heart-pulse" },
+                { val: "body_sternum_under", label: {it:"Sotto-seno (Underboob)", en:"Underboob"}, type: "body", icon: "fa-venus" },
+                { val: "body_chest_pec", label: {it:"Pettorale", en:"Pectoral"}, type: "body", icon: "fa-shield-halved" },
+                { val: "body_chest_full", label: {it:"Petto Intero", en:"Full Chest"}, type: "body", icon: "fa-expand" },
+                { val: "body_ribs", label: {it:"Costole", en:"Ribs"}, type: "body", icon: "fa-lungs" },
+                { val: "body_stomach", label: {it:"Ventre/Addome", en:"Stomach"}, type: "body", icon: "fa-cube" },
+                { val: "body_hip", label: {it:"Fianco/Anca", en:"Hip"}, type: "body", icon: "fa-person-dress" },
+                { val: "body_clavicle", label: {it:"Clavicola", en:"Collarbone"}, type: "body", icon: "fa-bone" }
             ],
-            "Schiena": [
-                { val: "body_back_upper", label: "Schiena Alta/Scapola", type: "body", icon: "fa-feather" },
-                { val: "body_back_lower", label: "Lombare", type: "body", icon: "fa-anchor" },
-                { val: "body_back_full", label: "Schiena Intera", type: "body", icon: "fa-child-reaching" },
-                { val: "body_spine", label: "Colonna Vertebrale", type: "body", icon: "fa-ellipsis-vertical" }
+            "cat_back": [
+                { val: "body_back_upper", label: {it:"Schiena Alta/Scapola", en:"Upper Back/Scapula"}, type: "body", icon: "fa-feather" },
+                { val: "body_back_lower", label: {it:"Lombare", en:"Lower Back"}, type: "body", icon: "fa-anchor" },
+                { val: "body_back_full", label: {it:"Schiena Intera", en:"Full Back"}, type: "body", icon: "fa-child-reaching" },
+                { val: "body_spine", label: {it:"Colonna Vertebrale", en:"Spine"}, type: "body", icon: "fa-ellipsis-vertical" }
             ],
-            "Gambe": [
-                { val: "body_thigh_front", label: "Coscia Anteriore", type: "body", icon: "fa-layer-group" },
-                { val: "body_thigh_side", label: "Coscia Laterale", type: "body", icon: "fa-pause" },
-                { val: "body_thigh_back", label: "Retro Coscia", type: "body", icon: "fa-pause" },
-                { val: "body_knee", label: "Ginocchio", type: "body", icon: "fa-circle" },
-                { val: "body_calf", label: "Polpaccio", type: "body", icon: "fa-socks" },
-                { val: "body_shin", label: "Stinco", type: "body", icon: "fa-text-height" },
-                { val: "body_ankle", label: "Caviglia", type: "body", icon: "fa-shoe-prints" },
-                { val: "body_foot_top", label: "Collo del Piede", type: "body", icon: "fa-shoe-prints" }
+            "cat_leg": [
+                { val: "body_thigh_front", label: {it:"Coscia Anteriore", en:"Front Thigh"}, type: "body", icon: "fa-layer-group" },
+                { val: "body_thigh_side", label: {it:"Coscia Laterale", en:"Side Thigh"}, type: "body", icon: "fa-pause" },
+                { val: "body_thigh_back", label: {it:"Retro Coscia", en:"Back Thigh"}, type: "body", icon: "fa-pause" },
+                { val: "body_knee", label: {it:"Ginocchio", en:"Knee"}, type: "body", icon: "fa-circle" },
+                { val: "body_calf", label: {it:"Polpaccio", en:"Calf"}, type: "body", icon: "fa-socks" },
+                { val: "body_shin", label: {it:"Stinco", en:"Shin"}, type: "body", icon: "fa-text-height" },
+                { val: "body_ankle", label: {it:"Caviglia", en:"Ankle"}, type: "body", icon: "fa-shoe-prints" },
+                { val: "body_foot_top", label: {it:"Collo del Piede", en:"Top of Foot"}, type: "body", icon: "fa-shoe-prints" }
             ],
-            "Testa & Mani": [
-                { val: "body_neck_side", label: "Collo (Lato)", type: "body", icon: "fa-user-tie" },
-                { val: "body_neck_back", label: "Nuca", type: "body", icon: "fa-user" },
-                { val: "body_throat", label: "Gola", type: "body", icon: "fa-microphone-lines" },
-                { val: "body_hand_back", label: "Dorso Mano", type: "body", icon: "fa-hand" },
-                { val: "body_palm", label: "Palmo", type: "body", icon: "fa-hand-spock" },
-                { val: "body_hand_knuckles", label: "Nocche", type: "body", icon: "fa-hand-fist" },
-                { val: "body_fingers", label: "Dita", type: "body", icon: "fa-hand-pointer" },
-                { val: "body_behind_ear", label: "Dietro Orecchio", type: "body", icon: "fa-ear-listen" },
-                { val: "body_face", label: "Viso", type: "body", icon: "fa-face-smile" }
+            "cat_head": [
+                { val: "body_neck_side", label: {it:"Collo (Lato)", en:"Neck (Side)"}, type: "body", icon: "fa-user-tie" },
+                { val: "body_neck_back", label: {it:"Nuca", en:"Back of Neck"}, type: "body", icon: "fa-user" },
+                { val: "body_throat", label: {it:"Gola", en:"Throat"}, type: "body", icon: "fa-microphone-lines" },
+                { val: "body_hand_back", label: {it:"Dorso Mano", en:"Hand Back"}, type: "body", icon: "fa-hand" },
+                { val: "body_palm", label: {it:"Palmo", en:"Palm"}, type: "body", icon: "fa-hand-spock" },
+                { val: "body_hand_knuckles", label: {it:"Nocche", en:"Knuckles"}, type: "body", icon: "fa-hand-fist" },
+                { val: "body_fingers", label: {it:"Dita", en:"Fingers"}, type: "body", icon: "fa-hand-pointer" },
+                { val: "body_behind_ear", label: {it:"Dietro Orecchio", en:"Behind Ear"}, type: "body", icon: "fa-ear-listen" },
+                { val: "body_face", label: {it:"Viso", en:"Face"}, type: "body", icon: "fa-face-smile" }
             ]
         };
 
         // --- INIT & RENDER ---
 
         window.onload = function() {
-            renderCustomOptions('styleSelect-list', stylesData, 'styleSelect');
-            renderCustomOptions('contextSelect-list', contextData, 'contextSelect');
+            setLanguage('it'); // Default IT
             
-            // Slider Logic
             const slider = document.getElementById('eccentricitySlider');
-            const sliderVal = document.getElementById('sliderValue');
-            slider.oninput = function() {
-                let text = "Bilanciato";
-                if(this.value < 30) text = "Tecnico";
-                if(this.value > 70) text = "Visionario";
-                sliderVal.textContent = `${text} (${this.value}%)`;
-            }
+            slider.oninput = function() { updateSliderText(this.value); }
         };
+        
+        function updateSliderText(val) {
+            const sliderVal = document.getElementById('sliderValue');
+            const t = translations[currentLang];
+            let text = t.slider_bal;
+            if(val < 30) text = t.slider_low;
+            if(val > 70) text = t.slider_high;
+            sliderVal.textContent = `${text} (${val}%)`;
+        }
 
-        // --- CUSTOM SELECT LOGIC ---
+        // --- CUSTOM SELECT RENDER ---
 
         function renderCustomOptions(containerId, dataObj, inputId) {
             const container = document.getElementById(containerId);
+            container.innerHTML = ''; 
             
-            for (const [category, items] of Object.entries(dataObj)) {
+            for (const [catKey, items] of Object.entries(dataObj)) {
                 const catDiv = document.createElement('div');
                 catDiv.className = 'select-category';
-                catDiv.textContent = category;
+                catDiv.textContent = translations[currentLang][catKey] || catKey;
                 container.appendChild(catDiv);
 
                 items.forEach(item => {
-                    const label = item.label || item.val;
+                    let label = item.val;
+                    if(item.label) {
+                        label = item.label[currentLang] || item.label.it;
+                    }
+                    
                     const value = item.val; 
                     const fullObj = item.label ? JSON.stringify(item) : item.val; 
                     
@@ -473,6 +713,54 @@
                     container.appendChild(itemDiv);
                 });
             }
+        }
+
+        // Separate render for Gender and FixType
+        function renderFixTypes() {
+            const container = document.getElementById('fixTypeSelect-list');
+            container.innerHTML = '';
+            const t = translations[currentLang];
+            
+            const options = [
+                {val: 'coverup', label: t.fix_coverup, icon: 'fa-layer-group'},
+                {val: 'rework', label: t.fix_rework, icon: 'fa-wand-magic-sparkles'},
+                {val: 'add', label: t.fix_add, icon: 'fa-arrows-left-right'},
+                {val: 'color', label: t.fix_color, icon: 'fa-palette'},
+            ];
+            
+            options.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'select-item';
+                div.innerHTML = `<i class="fa-solid ${opt.icon} item-icon"></i> ${opt.label}`;
+                div.onclick = (e) => {
+                     e.stopPropagation();
+                     selectOption('fixType', opt.val, opt.label, opt.icon);
+                };
+                container.appendChild(div);
+            });
+        }
+        
+        function renderGender() {
+            const container = document.getElementById('genderSelect-list');
+            container.innerHTML = '';
+            const t = translations[currentLang];
+            
+            const options = [
+                {val: 'man', label: t.gender_man, icon: 'fa-mars'},
+                {val: 'woman', label: t.gender_woman, icon: 'fa-venus'},
+                {val: 'neutral', label: t.gender_neutral, icon: 'fa-genderless'},
+            ];
+            
+            options.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'select-item';
+                div.innerHTML = `<i class="fa-solid ${opt.icon} item-icon"></i> ${opt.label}`;
+                div.onclick = (e) => {
+                     e.stopPropagation();
+                     selectOption('genderSelect', opt.val, opt.label, opt.icon);
+                };
+                container.appendChild(div);
+            });
         }
 
         function selectOption(selectId, value, label, iconClass) {
@@ -504,6 +792,13 @@
             for (let i = 0; i < items.length; i++) {
                 items[i].classList.add("select-hide");
             }
+        }
+
+        function toggleTextSection() {
+            const isChecked = document.getElementById('textToggle').checked;
+            const section = document.getElementById('textSection');
+            if(isChecked) section.classList.remove('hidden');
+            else section.classList.add('hidden');
         }
 
         // --- APP LOGIC ---
@@ -564,9 +859,14 @@
             const contextRaw = document.getElementById('contextSelect').value;
             const gender = document.getElementById('genderSelect').value;
             const eccentricity = document.getElementById('eccentricitySlider').value;
+            const isSarcastic = document.getElementById('sarcasmToggle').checked;
+            const isInteractive = document.getElementById('interactionToggle').checked;
+            const isLiteralInteraction = document.getElementById('literalInteractionToggle').checked;
+            const isTextEnabled = document.getElementById('textToggle').checked;
+            const textContent = document.getElementById('tattooText').value.trim();
 
             if (!style || !contextRaw) {
-                alert("Seleziona Stile e Contesto.");
+                alert(currentLang === 'it' ? "Seleziona Stile e Contesto." : "Please select Style and Context.");
                 return;
             }
 
@@ -578,8 +878,19 @@
             
             if (contextObj.type === "body") {
                 let genderTerm = gender === "man" ? "male" : (gender === "woman" ? "female" : "person");
-                // Uses the FULL exhaustive map now
-                contextString = `tattooed on ${genderTerm} ${translateBodyPart(contextObj.val)}, close up, realistic skin texture`;
+                const translatedBodyPart = translateBodyPart(contextObj.val);
+                
+                let anatomicalInteraction = "";
+                if (isInteractive) {
+                    anatomicalInteraction = ", interacting with body curvature, wrapping around the anatomy, following muscle structure, 3D illusion depth";
+                }
+
+                let literalInteraction = "";
+                if (isLiteralInteraction) {
+                    literalInteraction = `, subject is literally grabbing the ${translatedBodyPart}, holding onto the ${translatedBodyPart}, pinching the skin, physical interaction with the anatomy, dynamic pose interacting with ${translatedBodyPart}`;
+                }
+
+                contextString = `tattooed on ${genderTerm} ${translatedBodyPart}${anatomicalInteraction}${literalInteraction}, close up, realistic skin texture`;
             } else if (contextObj.type === "stencil") {
                 contextString = "tattoo stencil, purple carbon lines on white paper, outline only, no shading, flat lay, top-down view, 2D plan, no perspective, white background, high contrast";
             } else {
@@ -597,19 +908,35 @@
             else if (eccentricity > 70) creativityKeywords = "avant-garde, visionary art, complex details, artistic freedom";
             else creativityKeywords = "balanced composition, professional tattoo art";
 
+            let sarcasmString = "";
+            if (isSarcastic) {
+                sarcasmString = ", sarcastic interpretation, satirical, irony, funny element, whimsical twist, caricature, exaggerated expression";
+            }
+
+            let textString = "";
+            if (isTextEnabled && textContent) {
+                textString = `, incorporating the text "${textContent}" written in a matching font, clearly legible text "${textContent}" integrated into the design`;
+            }
+
             if (currentMode === 'new') {
                 const subject = document.getElementById('subjectInput').value.trim();
-                if (!subject) { alert("Descrivi il soggetto."); return; }
+                if (!subject) { 
+                    alert(currentLang === 'it' ? "Descrivi il soggetto." : "Please describe the subject."); 
+                    return; 
+                }
                 
                 if (contextObj.type === "stencil") {
-                     prompt = `${style} tattoo design of ${subject}, ${contextString}. ${creativityKeywords}.`;
+                     prompt = `${style} tattoo design of ${subject}${textString}${sarcasmString}, ${contextString}. ${creativityKeywords}.`;
                 } else {
-                     prompt = `${style} tattoo design of ${subject}, ${contextString}. ${creativityKeywords}, Masterpiece, 8k resolution, sharp focus.`;
+                     prompt = `${style} tattoo design of ${subject}${textString}${sarcasmString}, ${contextString}. ${creativityKeywords}, Masterpiece, 8k resolution, sharp focus.`;
                 }
             } else {
                 const fixType = document.getElementById('fixTypeSelect').value;
                 const fixDesc = document.getElementById('fixInput').value.trim();
-                if (!fixDesc || !fixType) { alert("Descrivi la modifica e seleziona il tipo."); return; }
+                if (!fixDesc || !fixType) { 
+                    alert(currentLang === 'it' ? "Descrivi la modifica e seleziona il tipo." : "Describe the fix and select a type."); 
+                    return; 
+                }
 
                 let actionKeyword = "";
                 let technique = "";
@@ -618,34 +945,28 @@
                 else if (fixType === 'add') { actionKeyword = "Expansion"; technique = "seamless integration"; }
                 else { actionKeyword = "Colorizing"; technique = "vibrant color packing"; }
 
-                prompt = `[Image-to-Image] ${actionKeyword}: ${fixDesc}. Style: ${style}. ${technique}. Context: ${contextString}. ${creativityKeywords}, 8k resolution.`;
+                prompt = `[Image-to-Image] ${actionKeyword}: ${fixDesc}${textString}${sarcasmString}. Style: ${style}. ${technique}. Context: ${contextString}. ${creativityKeywords}, 8k resolution.`;
             }
 
             document.getElementById('outputPrompt').value = prompt;
         }
 
         function translateBodyPart(val) {
-            // EXHAUSTIVE MAP - No missing keys
             const map = {
-                // Arms
                 "body_forearm_inner": "inner forearm", "body_forearm_outer": "outer forearm",
                 "body_sleeve_full": "full arm sleeve", "body_sleeve_half": "half arm sleeve",
                 "body_bicep_inner": "inner bicep", "body_bicep_outer": "outer bicep shoulder",
                 "body_elbow": "elbow", "body_wrist": "wrist",
-                // Torso
                 "body_chest_center": "center sternum", "body_chest_pec": "pectoral muscle",
                 "body_chest_full": "full chest", "body_sternum_under": "underboob sternum area",
                 "body_ribs": "rib cage side", "body_stomach": "stomach abdomen", 
                 "body_hip": "hip bone", "body_clavicle": "collarbone clavicle",
-                // Back
                 "body_back_upper": "upper back shoulder blade", "body_back_lower": "lower back", 
                 "body_back_full": "full back", "body_spine": "spine line",
-                // Legs
                 "body_thigh_front": "front of thigh", "body_thigh_side": "side of thigh", 
                 "body_thigh_back": "back of thigh", "body_knee": "knee",
                 "body_calf": "calf muscle", "body_shin": "shin bone", 
                 "body_ankle": "ankle", "body_foot_top": "top of foot",
-                // Head/Extremities
                 "body_neck_side": "side of neck", "body_neck_back": "back of neck", 
                 "body_throat": "throat", "body_behind_ear": "behind ear", 
                 "body_hand_back": "back of hand", "body_palm": "palm of hand", 
@@ -669,8 +990,8 @@
                         badge.classList.add('opacity-0');
                         setTimeout(() => badge.classList.add('hidden'), 300);
                     }, 2000);
-                } else { alert("Copia manuale richiesta."); }
-            } catch (err) { alert("Errore copia."); }
+                } else { alert(currentLang === 'it' ? "Copia manuale richiesta." : "Manual copy required."); }
+            } catch (err) { alert(currentLang === 'it' ? "Errore copia." : "Copy error."); }
         }
     </script>
 </body>
