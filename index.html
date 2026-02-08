@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Concept Generator V6</title>
+    <title>Tattoo Concept Generator V7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -74,7 +74,7 @@
             left: 0;
             right: 0;
             z-index: 99;
-            max-height: 400px; /* Increased height for longer list */
+            max-height: 400px;
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
@@ -307,7 +307,7 @@
     </main>
 
     <script>
-        // --- DATASETS (Full Restore & Categorized) ---
+        // --- DATASETS (Full & Categorized) ---
         
         const stylesData = {
             "Classici & Culturali": [
@@ -316,7 +316,7 @@
                 { val: "Tribal", icon: "fa-bullseye" },
                 { val: "Polynesian / Maori", icon: "fa-sun" },
                 { val: "Irezumi (Japanese)", icon: "fa-dragon" },
-                { val: "Celtic", icon: "fa-infinity" }, /* Fixed Icon */
+                { val: "Celtic", icon: "fa-infinity" },
                 { val: "Viking / Norse", icon: "fa-shield-halved" },
                 { val: "Chicano", icon: "fa-masks-theater" },
                 { val: "Henna / Mehndi", icon: "fa-seedling" }
@@ -449,32 +449,25 @@
             const container = document.getElementById(containerId);
             
             for (const [category, items] of Object.entries(dataObj)) {
-                // Render Category Header
                 const catDiv = document.createElement('div');
                 catDiv.className = 'select-category';
                 catDiv.textContent = category;
                 container.appendChild(catDiv);
 
-                // Render Items
                 items.forEach(item => {
                     const label = item.label || item.val;
-                    const value = item.val; // Value to store
-                    const fullObj = item.label ? JSON.stringify(item) : item.val; // Value logic differs for context vs style
+                    const value = item.val; 
+                    const fullObj = item.label ? JSON.stringify(item) : item.val; 
                     
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'select-item';
                     itemDiv.innerHTML = `<i class="fa-solid ${item.icon} item-icon"></i> ${label}`;
                     
-                    // On click: update display, update hidden input, close dropdown
                     itemDiv.onclick = (e) => {
                         e.stopPropagation();
-                        // Update Display Text
                         const displaySpan = document.getElementById(`${inputId}-display`);
                         displaySpan.innerHTML = `<i class="fa-solid ${item.icon} mr-2 text-gold-500"></i> ${label}`;
-                        
-                        // Update Hidden Input
                         document.getElementById(inputId).value = fullObj;
-                        
                         closeAllSelect();
                     };
                     container.appendChild(itemDiv);
@@ -482,20 +475,16 @@
             }
         }
 
-        // Helper for static selects (Fix Type & Gender)
         function selectOption(selectId, value, label, iconClass) {
             const displayId = `${selectId}-display`;
             const displayEl = document.getElementById(displayId);
             
-            // Only Gender has a display ID that changes text, FixType just updates value usually or text
             if(displayEl) {
                 displayEl.innerHTML = `<i class="fa-solid ${iconClass} mr-2 text-gold-500"></i> ${label}`;
             } else {
-                 // For FixType which has static text initially
                  const parent = document.getElementById(`${selectId}-container`).querySelector('.select-selected span');
                  parent.innerHTML = `<i class="fa-solid ${iconClass} mr-2 text-gold-500"></i> ${label}`;
             }
-
             document.getElementById(selectId).value = value;
             closeAllSelect();
         }
@@ -504,7 +493,7 @@
             e.stopPropagation();
             const list = document.getElementById(listId);
             const wasHidden = list.classList.contains('select-hide');
-            closeAllSelect(); // Close others
+            closeAllSelect(); 
             if (wasHidden) {
                 list.classList.remove('select-hide');
             }
@@ -552,7 +541,6 @@
                     const img = document.getElementById('imagePreview');
                     const placeholder = document.getElementById('uploadPlaceholder');
                     const btn = document.getElementById('removeImageBtn');
-                    
                     img.src = e.target.result;
                     img.classList.remove('hidden');
                     placeholder.classList.add('hidden');
@@ -585,19 +573,22 @@
             const contextObj = JSON.parse(contextRaw);
             let prompt = "";
             
-            // Context String Logic
+            // Context Logic
             let contextString = "";
             
             if (contextObj.type === "body") {
                 let genderTerm = gender === "man" ? "male" : (gender === "woman" ? "female" : "person");
+                // Uses the FULL exhaustive map now
                 contextString = `tattooed on ${genderTerm} ${translateBodyPart(contextObj.val)}, close up, realistic skin texture`;
             } else if (contextObj.type === "stencil") {
                 contextString = "tattoo stencil, purple carbon lines on white paper, outline only, no shading, flat lay, top-down view, 2D plan, no perspective, white background, high contrast";
             } else {
-                // OTHER FLAT DESIGNS
+                // FLAT DESIGNS
                 if(contextObj.val.includes("white")) contextString = "clean white background, 2d design, flat vector style, isolated, top-down view";
                 else if(contextObj.val.includes("transfer")) contextString = "purple transfer paper texture, hectograph ink style, tattoo stencil";
                 else if(contextObj.val.includes("digital")) contextString = "digital art illustration interface, procreate screen style, high definition";
+                else if(contextObj.val.includes("synthetic")) contextString = "tattoo practice on silicone fake skin, synthetic texture, realistic needle depth";
+                else if(contextObj.val.includes("parchment")) contextString = "vintage parchment paper texture, old sketch style";
                 else contextString = "isolated design, neutral background";
             }
 
@@ -622,7 +613,6 @@
 
                 let actionKeyword = "";
                 let technique = "";
-                // Mapping keywords based on fixType... (Simulated switch)
                 if (fixType === 'coverup') { actionKeyword = "Cover-up"; technique = "heavy shading, blast over style"; }
                 else if (fixType === 'rework') { actionKeyword = "Restoration"; technique = "sharpening lines, touch up"; }
                 else if (fixType === 'add') { actionKeyword = "Expansion"; technique = "seamless integration"; }
@@ -635,18 +625,32 @@
         }
 
         function translateBodyPart(val) {
-            // Simplified Mapping for brevity
+            // EXHAUSTIVE MAP - No missing keys
             const map = {
+                // Arms
                 "body_forearm_inner": "inner forearm", "body_forearm_outer": "outer forearm",
                 "body_sleeve_full": "full arm sleeve", "body_sleeve_half": "half arm sleeve",
-                "body_bicep_inner": "inner bicep", "body_bicep_outer": "outer bicep",
-                "body_chest_center": "sternum", "body_ribs": "ribs", "body_back_full": "full back",
-                "body_back_upper": "upper back", "body_back_lower": "lower back", "body_spine": "spine",
-                "body_thigh_front": "front thigh", "body_thigh_side": "side thigh", "body_thigh_back": "back thigh",
-                "body_calf": "calf", "body_ankle": "ankle", "body_foot_top": "top of foot",
-                "body_neck_side": "neck", "body_neck_back": "back of neck", "body_hand_back": "hand",
-                "body_palm": "palm", "body_fingers": "fingers", "body_hand_knuckles": "knuckles",
-                "body_behind_ear": "behind ear", "body_face": "face", "body_throat": "throat"
+                "body_bicep_inner": "inner bicep", "body_bicep_outer": "outer bicep shoulder",
+                "body_elbow": "elbow", "body_wrist": "wrist",
+                // Torso
+                "body_chest_center": "center sternum", "body_chest_pec": "pectoral muscle",
+                "body_chest_full": "full chest", "body_sternum_under": "underboob sternum area",
+                "body_ribs": "rib cage side", "body_stomach": "stomach abdomen", 
+                "body_hip": "hip bone", "body_clavicle": "collarbone clavicle",
+                // Back
+                "body_back_upper": "upper back shoulder blade", "body_back_lower": "lower back", 
+                "body_back_full": "full back", "body_spine": "spine line",
+                // Legs
+                "body_thigh_front": "front of thigh", "body_thigh_side": "side of thigh", 
+                "body_thigh_back": "back of thigh", "body_knee": "knee",
+                "body_calf": "calf muscle", "body_shin": "shin bone", 
+                "body_ankle": "ankle", "body_foot_top": "top of foot",
+                // Head/Extremities
+                "body_neck_side": "side of neck", "body_neck_back": "back of neck", 
+                "body_throat": "throat", "body_behind_ear": "behind ear", 
+                "body_hand_back": "back of hand", "body_palm": "palm of hand", 
+                "body_hand_knuckles": "knuckles", "body_fingers": "fingers", 
+                "body_face": "face"
             };
             return map[val] || "skin";
         }
@@ -671,5 +675,4 @@
     </script>
 </body>
 </html>
-
 
