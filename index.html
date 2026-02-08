@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Concept Generator</title>
+    <title>Tattoo Concept Generator V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -46,57 +46,130 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #eab308;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #475569;
+            border-radius: 2px;
+        }
+        .tab-active {
+            border-bottom: 2px solid #eab308;
+            color: #eab308;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+        }
+        .tab-inactive:hover {
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4">
 
     <!-- Main Container -->
-    <main class="w-full max-w-4xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8">
+    <main class="w-full max-w-5xl glass-panel rounded-2xl shadow-2xl p-6 md:p-8">
         
         <!-- Header -->
-        <header class="text-center mb-10 border-b border-slate-700 pb-6">
+        <header class="text-center mb-8 border-b border-slate-700 pb-6">
             <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
                 <i class="fa-solid fa-pen-nib text-gold-500 mr-3"></i>Ink<span class="text-gold-500">Prompt</span>
             </h1>
-            <p class="text-slate-400 text-sm md:text-base">Generatore di concept per tatuaggi ottimizzato per AI (Nano Banana)</p>
+            <p class="text-slate-400 text-sm md:text-base">Generatore & Restyling Tatuaggi AI (Nano Banana/SDXL)</p>
         </header>
 
-        <!-- Form Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- Left Column: Inputs -->
-            <div class="space-y-6">
-                
-                <!-- Subject Input -->
-                <div>
-                    <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">1. Descrivi il Soggetto</label>
-                    <textarea id="subjectInput" rows="3" 
-                        class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
-                        placeholder="Es: Un lupo che ulula alla luna geometrica con rose..."></textarea>
-                </div>
+        <!-- Tabs -->
+        <div class="flex mb-8 space-x-6 justify-center">
+            <button onclick="switchTab('new')" id="tab-new" class="tab-active text-lg font-bold pb-2 uppercase tracking-wide transition-colors">
+                <i class="fa-solid fa-plus-circle mr-2"></i>Nuovo Concept
+            </button>
+            <button onclick="switchTab('fix')" id="tab-fix" class="tab-inactive text-lg font-bold pb-2 uppercase tracking-wide transition-colors">
+                <i class="fa-solid fa-bandage mr-2"></i>Cover-Up / Modifica
+            </button>
+        </div>
 
-                <!-- Style Select -->
-                <div>
-                    <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">2. Stile Artistico</label>
-                    <div class="relative">
-                        <select id="styleSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
-                            <option value="" disabled selected>Seleziona uno stile...</option>
-                            <!-- Options populated via JS -->
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </div>
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- LEFT COLUMN: INPUTS -->
+            <div class="space-y-5">
+                
+                <!-- SECTION: NEW DESIGN (Hidden via JS if not active) -->
+                <div id="section-new" class="space-y-5">
+                    <div>
+                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">1. Descrivi il Soggetto</label>
+                        <textarea id="subjectInput" rows="3" 
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
+                            placeholder="Es: Un lupo che ulula alla luna geometrica..."></textarea>
                     </div>
                 </div>
 
-                <!-- Context & Gender Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Context Select -->
+                <!-- SECTION: FIX/COVER-UP (Hidden by default) -->
+                <div id="section-fix" class="hidden space-y-5">
+                    
+                    <!-- Image Upload -->
+                    <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center hover:bg-slate-800/50 transition cursor-pointer relative" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="previewImage(event)">
+                        <div id="uploadPlaceholder">
+                            <i class="fa-solid fa-camera text-3xl text-slate-500 mb-2"></i>
+                            <p class="text-slate-400 text-sm">Clicca per caricare la foto del tatuaggio attuale</p>
+                        </div>
+                        <img id="imagePreview" class="hidden max-h-40 mx-auto rounded shadow-lg object-contain" />
+                        <button id="removeImageBtn" onclick="removeImage(event)" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                            <i class="fa-solid fa-times text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Fix Type -->
                     <div>
-                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">3. Contesto / Posizione</label>
+                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">Tipo di Intervento</label>
                         <div class="relative">
-                            <select id="contextSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
-                                <option value="" disabled selected>Dove va?</option>
+                            <select id="fixTypeSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                <option value="coverup">Cover Up (Copertura Totale)</option>
+                                <option value="rework">Rework / Restauro (Migliora esistente)</option>
+                                <option value="add">Espansione (Aggiungi elementi intorno)</option>
+                                <option value="color">Colorize (Aggiungi colore a B&W)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fix Description -->
+                    <div>
+                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">Obiettivo / Modifica</label>
+                        <textarea id="fixInput" rows="2" 
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition shadow-inner"
+                            placeholder="Es: Copri la scritta con una rosa, rendi le linee più nitide..."></textarea>
+                    </div>
+                </div>
+
+                <!-- SHARED CONTROLS (Style, Context, Slider) -->
+                <div class="space-y-5 border-t border-slate-700 pt-5">
+                    
+                    <!-- Style Select -->
+                    <div>
+                        <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">Stile Desiderato</label>
+                        <div class="relative">
+                            <select id="styleSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                <option value="" disabled selected>Seleziona uno stile...</option>
                                 <!-- Options populated via JS -->
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
@@ -105,60 +178,92 @@
                         </div>
                     </div>
 
-                    <!-- Gender Select -->
-                    <div>
-                        <label class="block text-slate-400 text-sm font-bold mb-2 uppercase tracking-wider">Anatomia (Opzionale)</label>
-                        <div class="relative">
-                            <select id="genderSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
-                                <option value="man">Uomo</option>
-                                <option value="woman">Donna</option>
-                                <option value="neutral">Neutro / Non spec.</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                                <i class="fa-solid fa-user"></i>
+                    <!-- Context & Gender Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Context Select -->
+                        <div>
+                            <label class="block text-gold-500 text-sm font-bold mb-2 uppercase tracking-wider">Posizione / Contesto</label>
+                            <div class="relative">
+                                <select id="contextSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                    <option value="" disabled selected>Dove si trova?</option>
+                                    <!-- Options populated via JS -->
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gold-500">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gender Select -->
+                        <div>
+                            <label class="block text-slate-400 text-sm font-bold mb-2 uppercase tracking-wider">Anatomia</label>
+                            <div class="relative">
+                                <select id="genderSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 appearance-none text-white focus:outline-none focus:border-gold-500 transition cursor-pointer">
+                                    <option value="man">Uomo</option>
+                                    <option value="woman">Donna</option>
+                                    <option value="neutral">Neutro</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Eccentricity Slider -->
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-gold-500 text-sm font-bold uppercase tracking-wider">Creatività / Variazione AI</label>
+                            <span id="sliderValue" class="text-xs text-gold-500 font-mono">Bilanciato (50%)</span>
+                        </div>
+                        <input type="range" id="eccentricitySlider" min="0" max="100" value="50" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-slate-400 mt-2 font-mono">
+                            <span>Fedele/Restauro</span>
+                            <span>Eccentrico/BlastOver</span>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button onclick="generatePrompt()" 
+                        class="w-full bg-gradient-to-r from-gold-600 to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-slate-900 font-bold py-4 px-6 rounded-lg shadow-lg transform transition hover:-translate-y-1 active:translate-y-0">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Genera Prompt
+                    </button>
                 </div>
-
-                <!-- Generate Button -->
-                <button onclick="generatePrompt()" 
-                    class="w-full bg-gradient-to-r from-gold-600 to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-slate-900 font-bold py-4 px-6 rounded-lg shadow-lg transform transition hover:-translate-y-1 active:translate-y-0 mt-4">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Genera Prompt
-                </button>
-
             </div>
 
-            <!-- Right Column: Output -->
-            <div class="flex flex-col h-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden relative">
+            <!-- RIGHT COLUMN: OUTPUT -->
+            <div class="flex flex-col h-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden relative min-h-[400px]">
                 <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                    <span class="text-xs font-mono text-slate-400 uppercase">Output Prompt</span>
-                    <span class="text-xs text-green-500 hidden" id="copySuccess"><i class="fa-solid fa-check"></i> Copiato!</span>
+                    <span class="text-xs font-mono text-slate-400 uppercase">Output Prompt (Ready for Nano Banana)</span>
+                    <span class="text-xs text-green-500 hidden opacity-0 transition-opacity duration-300" id="copySuccess"><i class="fa-solid fa-check"></i> Copiato!</span>
                 </div>
                 
                 <textarea id="outputPrompt" readonly 
                     class="flex-grow w-full bg-transparent p-6 text-slate-300 font-mono text-sm resize-none focus:outline-none custom-scrollbar leading-relaxed"
-                    placeholder="Il tuo prompt apparirà qui pronto per essere copiato..."></textarea>
+                    placeholder="Il tuo prompt apparirà qui..."></textarea>
                 
-                <div class="p-4 bg-slate-900 border-t border-slate-800">
+                <div class="p-4 bg-slate-900 border-t border-slate-800 space-y-2">
+                     <p class="text-xs text-slate-500 mb-2 italic" id="uploadHint" style="display:none;">
+                        <i class="fa-solid fa-info-circle"></i> Usa questo prompt nella funzione "Image-to-Image" caricando la tua foto.
+                    </p>
                     <button onclick="copyToClipboard()" 
                         class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 px-4 rounded border border-slate-600 transition flex justify-center items-center group">
-                        <i class="fa-regular fa-copy mr-2 group-hover:scale-110 transition"></i> Copia negli appunti
+                        <i class="fa-regular fa-copy mr-2 group-hover:scale-110 transition"></i> Copia prompt
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="mt-8 text-center text-slate-500 text-xs">
             <p>Ottimizzato per modelli Stable Diffusion XL, Midjourney v6 e Nano Banana.</p>
         </div>
     </main>
 
     <script>
-        // --- DATASETS ---
+        // --- STATE ---
+        let currentMode = 'new'; // 'new' or 'fix'
 
-        // 50+ Styles optimized for Tattoo Generation
+        // --- DATASETS ---
         const styles = [
             "Traditional Old School (Bold lines, limited palette)",
             "Neo-Traditional (Bold lines, vibrant colors, depth)",
@@ -213,16 +318,12 @@
             "Oil Painting (Brush strokes, textured)"
         ];
 
-        // 50+ Contexts (Body parts & Design modes)
         const contexts = [
-            // Design/Concept Modes
             { val: "design_white", label: "Design: Foglio Bianco (Clean Flash)", type: "flat" },
             { val: "design_parchment", label: "Design: Carta Pergamena Vintage", type: "flat" },
             { val: "design_stencil", label: "Design: Stencil (Linee Guida)", type: "flat" },
             { val: "design_digital", label: "Design: Illustrazione Digitale (iPad)", type: "flat" },
             { val: "design_synthetic", label: "Design: Pelle Sintetica (Mockup)", type: "flat" },
-            
-            // Upper Body
             { val: "body_forearm_inner", label: "Corpo: Avambraccio Interno", type: "body" },
             { val: "body_forearm_outer", label: "Corpo: Avambraccio Esterno", type: "body" },
             { val: "body_bicep_inner", label: "Corpo: Bicipite Interno", type: "body" },
@@ -235,14 +336,10 @@
             { val: "body_ribs", label: "Corpo: Costole / Fianco Alto", type: "body" },
             { val: "body_stomach", label: "Corpo: Ventre / Addome", type: "body" },
             { val: "body_hip", label: "Corpo: Fianco Basso / Anca", type: "body" },
-            
-            // Back
             { val: "body_back_upper", label: "Corpo: Schiena Alta / Scapola", type: "body" },
             { val: "body_back_lower", label: "Corpo: Fondoschiena / Lombare", type: "body" },
             { val: "body_back_full", label: "Corpo: Schiena Intera (Backpiece)", type: "body" },
             { val: "body_spine", label: "Corpo: Colonna Vertebrale", type: "body" },
-            
-            // Lower Body
             { val: "body_thigh_front", label: "Corpo: Coscia Anteriore", type: "body" },
             { val: "body_thigh_side", label: "Corpo: Coscia Laterale", type: "body" },
             { val: "body_thigh_back", label: "Corpo: Retro Coscia", type: "body" },
@@ -251,8 +348,6 @@
             { val: "body_calf", label: "Corpo: Polpaccio", type: "body" },
             { val: "body_ankle", label: "Corpo: Caviglia", type: "body" },
             { val: "body_foot_top", label: "Corpo: Collo del Piede", type: "body" },
-            
-            // Head/Neck/Hands
             { val: "body_neck_side", label: "Corpo: Collo (Lato)", type: "body" },
             { val: "body_neck_back", label: "Corpo: Nuca", type: "body" },
             { val: "body_throat", label: "Corpo: Gola", type: "body" },
@@ -266,12 +361,10 @@
         ];
 
         // --- INITIALIZATION ---
-
-        function init() {
+        window.onload = function() {
             const styleSel = document.getElementById('styleSelect');
             const contextSel = document.getElementById('contextSelect');
 
-            // Populate Styles
             styles.forEach(style => {
                 const opt = document.createElement('option');
                 opt.value = style;
@@ -279,109 +372,155 @@
                 styleSel.appendChild(opt);
             });
 
-            // Populate Contexts
             contexts.forEach(ctx => {
                 const opt = document.createElement('option');
-                opt.value = JSON.stringify(ctx); // Store full object in value
+                opt.value = JSON.stringify(ctx); 
                 opt.textContent = ctx.label;
                 contextSel.appendChild(opt);
             });
+
+            // Slider Logic
+            const slider = document.getElementById('eccentricitySlider');
+            const sliderVal = document.getElementById('sliderValue');
+            slider.oninput = function() {
+                let text = "Bilanciato";
+                if(this.value < 30) text = "Fedele / Preciso";
+                if(this.value > 70) text = "Eccentrico / Visionario";
+                sliderVal.textContent = `${text} (${this.value}%)`;
+            }
+        };
+
+        // --- TAB LOGIC ---
+        function switchTab(mode) {
+            currentMode = mode;
+            const tabNew = document.getElementById('tab-new');
+            const tabFix = document.getElementById('tab-fix');
+            const secNew = document.getElementById('section-new');
+            const secFix = document.getElementById('section-fix');
+            const hint = document.getElementById('uploadHint');
+
+            if (mode === 'new') {
+                tabNew.className = "tab-active text-lg font-bold pb-2 uppercase tracking-wide transition-colors";
+                tabFix.className = "tab-inactive text-lg font-bold pb-2 uppercase tracking-wide transition-colors";
+                secNew.classList.remove('hidden');
+                secFix.classList.add('hidden');
+                hint.style.display = 'none';
+            } else {
+                tabFix.className = "tab-active text-lg font-bold pb-2 uppercase tracking-wide transition-colors";
+                tabNew.className = "tab-inactive text-lg font-bold pb-2 uppercase tracking-wide transition-colors";
+                secFix.classList.remove('hidden');
+                secNew.classList.add('hidden');
+                hint.style.display = 'block';
+            }
         }
 
-        window.onload = init;
+        // --- IMAGE HANDLING ---
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imagePreview');
+                    const placeholder = document.getElementById('uploadPlaceholder');
+                    const btn = document.getElementById('removeImageBtn');
+                    
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    btn.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
-        // --- LOGIC ---
+        function removeImage(event) {
+            event.stopPropagation();
+            document.getElementById('fileInput').value = "";
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('imagePreview').src = "";
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('removeImageBtn').classList.add('hidden');
+        }
 
+        // --- PROMPT GENERATION ---
         function generatePrompt() {
-            const subject = document.getElementById('subjectInput').value.trim();
             const style = document.getElementById('styleSelect').value;
             const contextRaw = document.getElementById('contextSelect').value;
             const gender = document.getElementById('genderSelect').value;
+            const eccentricity = document.getElementById('eccentricitySlider').value;
 
-            if (!subject) {
-                alert("Per favore descrivi prima il soggetto del tatuaggio.");
-                return;
-            }
-            if (!style) {
-                alert("Seleziona uno stile.");
-                return;
-            }
-            if (!contextRaw) {
-                alert("Seleziona un contesto.");
+            if (!style || !contextRaw) {
+                alert("Seleziona Stile e Contesto.");
                 return;
             }
 
             const contextObj = JSON.parse(contextRaw);
             let prompt = "";
+            
+            // Context String Logic
             let contextString = "";
-
-            // 1. Build Context String based on type
             if (contextObj.type === "body") {
-                // Translator for basic prompt logic
-                let genderTerm = "";
-                if (gender === "man") genderTerm = "male";
-                else if (gender === "woman") genderTerm = "female";
-                else genderTerm = "person";
-
-                // Extract clean name from label (remove "Corpo: ")
-                const bodyPart = contextObj.label.replace("Corpo: ", "").toLowerCase(); // Italian to prompt mapping usually needs English, but modern models handle mixed well. Let's try to map keys or keep it simple.
-                // For better AI results, we map common Italian body parts to English roughly or keep description generic
-                
-                contextString = `tattooed on ${genderTerm} ${translateBodyPart(contextObj.val)}, close up photo, skin texture, realistic body placement`;
+                let genderTerm = gender === "man" ? "male" : (gender === "woman" ? "female" : "person");
+                contextString = `on ${genderTerm} ${translateBodyPart(contextObj.val)}`;
             } else {
-                // Flat design
-                if(contextObj.val.includes("white")) contextString = "clean white background, 2d design, flat vector style, isolated";
-                else if(contextObj.val.includes("parchment")) contextString = "on vintage parchment paper, sketch style, textured paper background";
-                else if(contextObj.val.includes("stencil")) contextString = "tattoo stencil, purple carbon lines on white paper, outline only, no shading";
-                else if(contextObj.val.includes("digital")) contextString = "digital art illustration, high definition, flat lay";
-                else contextString = "isolated design, neutral background";
+                contextString = contextObj.val.includes("white") ? "clean white background" : "neutral background";
             }
 
-            // 2. Construct Final Prompt
-            // Structure: [Style] tattoo design of [Subject], [Context], [Quality Boosters]
+            // Creativity Logic
+            let creativityKeywords = "";
+            if (eccentricity < 30) creativityKeywords = "minimal changes, precise lines, exact adherence";
+            else if (eccentricity > 70) creativityKeywords = "avant-garde, heavy artistic interpretation, visionary style, complex details";
+            else creativityKeywords = "balanced artistic interpretation";
+
+            // -- MODE SPECIFIC LOGIC --
+            if (currentMode === 'new') {
+                const subject = document.getElementById('subjectInput').value.trim();
+                if (!subject) { alert("Descrivi il soggetto."); return; }
+                
+                prompt = `${style} tattoo design of ${subject}, ${contextString}. ${creativityKeywords}, Masterpiece, 8k resolution, sharp focus, high contrast, professional tattoo portfolio.`;
             
-            prompt = `${style} tattoo design showing ${subject}. ${contextString}. Masterpiece, professional tattoo artist portfolio, 8k resolution, highly detailed, sharp focus, clear ink, high contrast.`;
+            } else {
+                // COVER-UP / FIX MODE
+                const fixType = document.getElementById('fixTypeSelect').value;
+                const fixDesc = document.getElementById('fixInput').value.trim();
+                
+                if (!fixDesc) { alert("Descrivi la modifica o il restyling."); return; }
+
+                let actionKeyword = "";
+                let technique = "";
+
+                if (fixType === 'coverup') {
+                    actionKeyword = "Cover-up tattoo transformation";
+                    technique = "heavy shading, blast over style, solid ink saturation to hide previous tattoo, clever placement";
+                } else if (fixType === 'rework') {
+                    actionKeyword = "Tattoo restoration and rework";
+                    technique = "sharpening lines, color vibrancy restoration, touch up, refreshing old ink, high definition";
+                } else if (fixType === 'add') {
+                    actionKeyword = "Tattoo expansion and addition";
+                    technique = "seamless integration with existing ink, extending pattern, flow consistency";
+                } else if (fixType === 'color') {
+                    actionKeyword = "Colorizing black and grey tattoo";
+                    technique = "vibrant color packing, watercolor splashes, gradient shading";
+                }
+
+                prompt = `[Image-to-Image] ${actionKeyword}: ${fixDesc}. Transform into ${style} style. ${technique}. Location: ${contextString}. ${creativityKeywords}, 8k resolution, professional tattoo photography.`;
+            }
 
             document.getElementById('outputPrompt').value = prompt;
         }
 
+        // --- UTILS ---
         function translateBodyPart(val) {
-            // Simple mapping helper to ensure the AI understands the anatomy better than Italian keywords sometimes
             const map = {
-                "body_forearm_inner": "inner forearm",
-                "body_forearm_outer": "outer forearm",
-                "body_bicep_inner": "inner bicep",
-                "body_bicep_outer": "shoulder and bicep",
-                "body_sleeve_full": "full arm sleeve",
-                "body_sleeve_half": "half arm sleeve",
-                "body_chest_center": "center of chest sternum",
-                "body_chest_pec": "pectoral muscle",
-                "body_chest_full": "full chest",
-                "body_ribs": "rib cage side",
-                "body_stomach": "stomach abdomen",
-                "body_hip": "hip bone",
-                "body_back_upper": "upper back shoulder blade",
-                "body_back_lower": "lower back",
-                "body_back_full": "full back",
-                "body_spine": "spine line",
-                "body_thigh_front": "front of thigh",
-                "body_thigh_side": "side of thigh",
-                "body_thigh_back": "back of thigh",
-                "body_knee": "knee",
-                "body_shin": "shin bone",
-                "body_calf": "calf muscle",
-                "body_ankle": "ankle",
-                "body_foot_top": "top of foot",
-                "body_neck_side": "side of neck",
-                "body_neck_back": "back of neck",
-                "body_throat": "throat",
-                "body_behind_ear": "skin behind ear",
-                "body_hand_back": "back of hand",
-                "body_palm": "palm of hand",
-                "body_fingers": "fingers",
-                "body_wrist": "wrist",
-                "body_face": "face",
-                "body_head_side": "side of head"
+                "body_forearm_inner": "inner forearm", "body_forearm_outer": "outer forearm",
+                "body_bicep_inner": "inner bicep", "body_bicep_outer": "shoulder/bicep",
+                "body_sleeve_full": "full arm sleeve", "body_sleeve_half": "half arm sleeve",
+                "body_chest_center": "sternum", "body_chest_pec": "pec", "body_chest_full": "full chest",
+                "body_ribs": "ribs", "body_stomach": "stomach", "body_hip": "hip",
+                "body_back_upper": "upper back", "body_back_lower": "lower back", "body_back_full": "full back",
+                "body_spine": "spine", "body_thigh_front": "front thigh", "body_thigh_side": "side thigh",
+                "body_thigh_back": "back thigh", "body_calf": "calf", "body_ankle": "ankle",
+                "body_neck_side": "neck", "body_hand_back": "hand", "body_wrist": "wrist"
             };
             return map[val] || "skin";
         }
@@ -389,28 +528,26 @@
         function copyToClipboard() {
             const copyText = document.getElementById("outputPrompt");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); // Mobile
+            copyText.setSelectionRange(0, 99999); 
             
             try {
-                // Fallback robusto per iframe/ambienti protetti
                 const successful = document.execCommand('copy');
                 if(successful) {
                     const badge = document.getElementById('copySuccess');
                     badge.classList.remove('hidden');
+                    badge.classList.remove('opacity-0');
                     setTimeout(() => {
-                        badge.classList.add('hidden');
+                        badge.classList.add('opacity-0');
+                        setTimeout(() => badge.classList.add('hidden'), 300);
                     }, 2000);
                 } else {
-                    // Fallback manuale se tutto fallisce
-                    alert("Copia automatica non supportata. Premi Ctrl+C / Cmd+C.");
+                    alert("Premi Ctrl+C per copiare.");
                 }
             } catch (err) {
-                console.error('Errore copia:', err);
-                alert("Errore durante la copia.");
+                alert("Errore copia.");
             }
         }
     </script>
 </body>
 </html>
-
 
